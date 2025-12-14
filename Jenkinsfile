@@ -1,44 +1,38 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage('Checkout') {
-      steps { checkout scm }
+    tools {
+        maven 'Maven'
     }
 
-    stage('Build Jar') {
-      steps {
-        sh 'mvn -B -U clean package || ./mvnw -B -U clean package'
-      }
-    }
-
-    stage('Deploy to Nexus') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'nexus-creds', usernameVariable: 'NX_USER', passwordVariable: 'NX_PASS')]) {
-          sh '''
-            mkdir -p ~/.m2
-            cat > ~/.m2/settings.xml <<EOF
-<settings>
-  <servers>
-    <server>
-      <id>nexus</id>
-      <username>${NX_USER}</username>
-      <password>${NX_PASS}</password>
-    </server>
-  </servers>
-</settings>
-EOF
-            mvn -B -U deploy || ./mvnw -B -U deploy
-          '''
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    }
-  }
 
-  post {
-    always {
-      archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-creds',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    sh '''
+                    mvn deploy \
+                      -DskipTests \
+                      -Dnexus.username=$NEXUS_USER \
+                      -Dnexus.password=$NEXUS_PASS
+                    '''
+                }
+            }
+        }
     }
-  }
 }
-
