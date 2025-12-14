@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  tools {
-    maven 'Maven'
-  }
-
   stages {
 
     stage('Debug Net') {
@@ -25,7 +21,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh 'mvn -B clean package -DskipTests'
+        sh './mvnw -B clean package -DskipTests'
       }
     }
 
@@ -37,12 +33,13 @@ pipeline {
           passwordVariable: 'NEXUS_PASS'
         )]) {
           sh '''
-            mvn -B deploy -DskipTests \
+            ./mvnw -B deploy -DskipTests \
               -Dnexus.username=$NEXUS_USER \
               -Dnexus.password=$NEXUS_PASS
           '''
         }
       }
     }
+
   }
 }
