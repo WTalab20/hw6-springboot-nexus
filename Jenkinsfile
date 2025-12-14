@@ -1,4 +1,5 @@
 pipeline {
+HEAD
     agent any
 
     tools {
@@ -35,4 +36,13 @@ pipeline {
             }
         }
     }
+  agent any
+  stages {
+    stage('Test') {
+      steps {
+        sh 'ls -la'
+      }
+    }
+  }
+5d1e4fb (Add Jenkins pipeline)
 }
