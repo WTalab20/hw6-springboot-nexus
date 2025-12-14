@@ -1,6 +1,16 @@
 pipeline {
   agent any
 
+  stage('Debug Net') {
+  steps {
+    sh 'echo "HOSTNAME=$(hostname)"'
+    sh 'cat /etc/resolv.conf || true'
+    sh 'getent hosts github.com || true'
+    sh 'curl -I https://github.com | head -n 5 || true'
+    sh 'git --version || true'
+  }
+}
+
   tools {
     maven 'Maven'
   }
